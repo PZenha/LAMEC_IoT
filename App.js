@@ -48,6 +48,25 @@ app.post('/data',(req,res) => {
     })
 });
 
+app.get('/espdata',(req,res) => {
+    var d = new Date();
+    
+    Event.find(/*{
+
+        "Time": {
+           $gte: d.setHours(d.getHours() - 1)
+        } 
+    }*/)
+    .sort({_id:-1}).limit(10)
+    .then(data => {
+        res.json(data);
+    })
+    .catch(err => {
+        res.json(err);
+        throw err;
+    })
+});
+
 app.get('/ola',(req,res)=>{
     let ola = "ola";
     res.json({data: ola});
