@@ -9,7 +9,7 @@ const eventSchema = new Schema({
     H_air: {
         type: Number
     },
-    H_soil: {
+    soil: {
         type: Number
     },
     Time: {
