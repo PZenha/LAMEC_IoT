@@ -20,9 +20,9 @@
 
 DHT dht(DHTPIN,DHTTYPE);
 
-const char* ssid = "pedro";
-const char* password = "123456789";
-const char* mqttServer ="192.168.43.135";   //"farmer.cloudmqtt.com";
+const char* ssid = "pedro";		//"MEO-CF0925";	
+const char* password ="123456789";	 //"9F9764AC4B";
+const char* mqttServer ="172.20.10.3";//"192.168.43.135";	//"192.168.1.119";	
 const int mqttPort = 1883;
 //const char* mqttUser = "pwimkkdw";
 //const char* mqttPassword = "nNDIkzJDsmVp"; 
@@ -30,37 +30,38 @@ const int mqttPort = 1883;
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-void callback(char* topic, byte* payload, unsigned int length);
-void TempAndHumi();
-void SoilMoisture();
+uint32_t time_start = 0;
+boolean TimeIsRunning = false;
 
-void TempAndHumi(){
-	//String dataS ="";
-	char* data ="";
+void callback(char* topic, byte* payload, unsigned int length);
+//void TempAndHumi();
+//void SoilMoisture();
+
+String TempAndHumi(){
 	float h = dht.readHumidity();	//Reads humidity value
 	float t = dht.readTemperature();	//Reads Temp. values
 	
 	if(isnan(h) || isnan(t)){
 		Serial.println("Failed to read DHT11 data!");
-		return;
+		return "";
 	}
-	
+	String dataS = "T_air:";
+	dataS += t;
+	dataS += " H_air:";
+	dataS += h;
 	Serial.print("Temperature: ");
 	Serial.print(t);
 	Serial.println(" C");
 	Serial.print("Humidity: ");
 	Serial.print(h);
 	Serial.println("%");
-	sprintf(data,"T_air:%.2f H_air:%.2f",t,h);
-	Serial.println("");
-	client.publish("esp/test", data);
+	return dataS;
 }
 
-void SoilMoisture(){
-	const float AirValue = 702; //Value measured on air, DRY
-	const float WaterValue = 521; //Value measured on water, WET
-	float soilPercentage = 0;
-	char* data ="";
+String SoilMoisture(){
+	const float AirValue = 712; //Value measured on air, DRY
+	const float WaterValue = 520; //Value measured on water, WET
+	short int soilPercentage = 0;
 	int moistureValue = analogRead(A0);  // [0;1023]
 	float Interval = AirValue - WaterValue;   //Value measured minus lowest number of the range interval
 	soilPercentage = ((AirValue - (float)moistureValue)/Interval) * 100.0;   //Transform value measured into percentage
@@ -69,20 +70,27 @@ void SoilMoisture(){
 	Serial.print(" - ");
 	Serial.print(soilPercentage);
 	Serial.println("%");
-	sprintf(data,"soil:%.2f",soilPercentage);
-	client.publish("esp/test", data);
-	Serial.println("");
+	String dataS = " soil:";
+	dataS += soilPercentage;
+	return dataS;
 }
+
+void SendDataByMqtt(String TH_air, String soilS){
+	String dataS = TH_air + soilS;
+	const char* data = dataS.c_str();
+	client.publish("esp/sensor", data);
+}
+
 
 void setup(){
 	Serial.begin(115200);
 	dht.begin(); 
 	delay(3000);
-	/*WiFi.begin(ssid, password);
+	WiFi.begin(ssid, password);
 	Serial.print("Connecting to ");
 	Serial.print(ssid);
 	int attempt = 0;
-	while(WiFi.status() != WL_CONNECTED && attempt<100){
+	while(WiFi.status() != WL_CONNECTED && attempt<100){  //Connecting to Wi-Fi
 		delay(100);
 		Serial.print(".");
 		attempt++;
@@ -99,7 +107,7 @@ void setup(){
 	
 	client.setServer(mqttServer,mqttPort);
 	client.setCallback(callback);
-	while(!client.connected()){
+	while(!client.connected()){  //Connecting to MQTT
 		Serial.println("Connecting to MQTT...");
 		delay(200);
 		if(client.connect("ESP8266Client")){
@@ -109,9 +117,8 @@ void setup(){
 			Serial.println(client.state());
 		}
 	}
-	Serial.println("Connected to MQTT broker");
-	client.publish("esp/test", "hello");
-	client.subscribe("esp/test"); */
+	client.publish("esp/sensor", "Hello I am alive");
+	client.subscribe("esp/sensor"); 
 	
 }
 
@@ -120,11 +127,16 @@ void setup(){
 // Add the main program code into the continuous loop() function
 void loop(){
 	client.loop();
-	TempAndHumi(); //Returns temp and humidity values
-	SoilMoisture();
-	delay(2000);
 	
+	if(!TimeIsRunning){
+		 time_start = millis();
+		 TimeIsRunning = true;
+	}
 	
+	if(millis() - time_start >= 5000 && TimeIsRunning == true){   //If time passed is greater than 1 minute 
+		TimeIsRunning = false;
+		SendDataByMqtt(TempAndHumi(),SoilMoisture());
+	}
 }
 
 
