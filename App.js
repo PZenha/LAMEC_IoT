@@ -3,11 +3,11 @@ const mqtt = require('mqtt');
 const bodyParser = require('body-parser');
 const moongose = require('mongoose');
 const Event = require('./models/event');
+const LastTime = require('./models/LastTimeOn');
 require('dotenv/config')
 
 const app = express();
 
-var mqttData;
 app.use(bodyParser.json());
 
 //CORS POLICY
@@ -24,6 +24,20 @@ app.use((req,res, next) => {
 
 var client = mqtt.connect('mqtt://localhost:1883');
 
+function SaveTimeToDB(){
+    const lastTime = new LastTime();
+
+    lastTime.save()
+    .then(data => {
+        console.log(new Date().toLocaleString());
+    })
+    .catch(err => {
+        console.log(err);
+        throw err;
+    });
+}
+
+
 client.on('connect', () =>{
     setInterval(() =>{
         client.subscribe('esp/sensor');
@@ -34,17 +48,18 @@ client.on('connect', () =>{
 
 client.on('message', (topic,message)=>{   // T_air:21.60 H_air:54.00 soil:100;
     context = message.toString();
+    console.log(context);
     var T_air_Index = context.indexOf("T_air");
     var H_air_Index = context.indexOf("H_air");
     var soil_Index = context.indexOf("soil:");
-    let T_air = context.slice(T_air_Index + 6,H_air_Index - 1);
-    let H_air = context.slice(H_air_Index + 6,soil_Index - 1);
-    let soil = context.slice(soil_Index + 5, context.length);
+    var T_air = context.slice(T_air_Index + 6,H_air_Index - 1);
+    var H_air = context.slice(H_air_Index + 6,soil_Index - 1);
+    var soil = context.slice(soil_Index + 5, context.length);
 
     const event = new Event({
         T_air: T_air,
         H_air: H_air,
-        soil:  soil
+        soil:  soil 
     });
 
     event.save()
@@ -55,54 +70,44 @@ client.on('message', (topic,message)=>{   // T_air:21.60 H_air:54.00 soil:100;
         console.log(err);
         throw err;
     })
+
+//If the ground is dry, than sends a mqtt message to turn the relay on
+    if(soil < 40){
+        client.publish("esp/actuator","ON");
+        console.log("Telling to turn water on...");
+        SaveTimeToDB();
+    }
+
 });
 
 moongose.connect(process.env.DB_CONNECTION).then(() =>{
         console.log("connected to mongodb");
 })
 
-/*app.post('/data',(req,res) => {
+app.post('/actuator',(req,res) => {
     console.log(req.body);
-    const event = new Event({
-        T_air: req.body.T_air,
-        H_air: req.body.H_air,
-        soil: req.body.H_soil
-    });
-
-    event.save()
-    .then(data => {
-        console.log(data);
-        res.json(data);
-    })
-    .catch(err => {
-        console.log(err);
-        res.json(err);
-        throw err;
-    })
-}); */
+    if(req.body.Relay === "ON"){
+        client.publish("esp/actuator", "ON");
+        SaveTimeToDB();
+    }
+    if(req.body.Relay === "OFF"){
+        client.publish("esp/actuator", "OFF");
+    }
+    res.json("OK");
+}); 
 
 app.get('/espdata',(req,res) => {
-    var d = new Date();
-    
-    Event.find(/*{
-
-        "Time": {
-           $gte: d.setHours(d.getHours() - 1)
-        } 
-    }*/)
+    Event.find()
     .sort({_id:-1}).limit(10)
     .then(data => {
-        res.json(data);
+        res.json({data,
+                  LastTime: TimeRelayWentOn
+                });
     })
     .catch(err => {
         res.json(err);
         throw err;
     })
-});
-
-app.get('/ola',(req,res)=>{
-    let ola = "ola";
-    res.json({data: ola});
 });
 
 app.listen(4000, ()=>{

@@ -15,6 +15,9 @@ const eventSchema = new Schema({
     Time: {
         type: Date,
         default: Date.now
+    },
+    LastTime: {
+        type: Date,
     }
 });
 
