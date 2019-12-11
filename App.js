@@ -10,6 +10,8 @@ const app = express();
 
 app.use(bodyParser.json());
 
+var TimeOn = "";
+
 //CORS POLICY
 //Setting the right headers to allow cross origin requests
 app.use((req,res, next) => {
@@ -30,6 +32,7 @@ function SaveTimeToDB(){
     lastTime.save()
     .then(data => {
         console.log(new Date().toLocaleString());
+        TimeOn = new Date().toLocaleString();
     })
     .catch(err => {
         console.log(err);
@@ -37,6 +40,17 @@ function SaveTimeToDB(){
     });
 }
 
+function GetLastTimeDB(){
+    LastTime.find()
+    .sort({_id: 1}).limit(1)
+    .then(data => {
+        TimeOn = new Date(data[0].LastTime).toLocaleString();
+    })
+    .catch(err => {
+        console.log(err);
+        throw err;
+    });
+}
 
 client.on('connect', () =>{
     setInterval(() =>{
@@ -49,34 +63,38 @@ client.on('connect', () =>{
 client.on('message', (topic,message)=>{   // T_air:21.60 H_air:54.00 soil:100;
     context = message.toString();
     console.log(context);
-    var T_air_Index = context.indexOf("T_air");
-    var H_air_Index = context.indexOf("H_air");
-    var soil_Index = context.indexOf("soil:");
-    var T_air = context.slice(T_air_Index + 6,H_air_Index - 1);
-    var H_air = context.slice(H_air_Index + 6,soil_Index - 1);
-    var soil = context.slice(soil_Index + 5, context.length);
+    if(context.includes("T_air")){
+        var T_air_Index = context.indexOf("T_air");
+        var H_air_Index = context.indexOf("H_air");
+        var soil_Index = context.indexOf("soil:");
+        var T_air = context.slice(T_air_Index + 6,H_air_Index - 1);
+        var H_air = context.slice(H_air_Index + 6,soil_Index - 1);
+        var soil = context.slice(soil_Index + 5, context.length);
 
-    const event = new Event({
-        T_air: T_air,
-        H_air: H_air,
-        soil:  soil 
-    });
+        if(soil < 90){
+            client.publish("esp/actuator","ON");
+            console.log("Telling to turn water on...");
+            SaveTimeToDB();
+        }
 
-    event.save()
-    .then(data => {
-        console.log(data);
-    })
-    .catch(err => {
-        console.log(err);
-        throw err;
-    })
+        const event = new Event({
+            T_air: T_air,
+            H_air: H_air,
+            soil:  soil 
+        });
 
-//If the ground is dry, than sends a mqtt message to turn the relay on
-    if(soil < 40){
-        client.publish("esp/actuator","ON");
-        console.log("Telling to turn water on...");
-        SaveTimeToDB();
+        event.save()
+        .then(data => {
+            console.log(data);
+        })
+        .catch(err => {
+            console.log(err);
+            throw err;
+        });
     }
+    
+//If the ground is dry, than sends a mqtt message to turn the relay on
+    
 
 });
 
@@ -97,12 +115,14 @@ app.post('/actuator',(req,res) => {
 }); 
 
 app.get('/espdata',(req,res) => {
+    GetLastTimeDB();
     Event.find()
     .sort({_id:-1}).limit(10)
-    .then(data => {
-        res.json({data,
-                  LastTime: TimeRelayWentOn
+    .then(dados => {
+       res.json({dados,
+                  LastTime: TimeOn
                 });
+               //res.json({dados: dados});
     })
     .catch(err => {
         res.json(err);
