@@ -177,8 +177,6 @@ class LineChart extends Component {
 		</div>
 		);
 	}
-	
-	
 }
  
 export default LineChart;
