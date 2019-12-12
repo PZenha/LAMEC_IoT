@@ -15,10 +15,11 @@ class LineChart extends Component {
 		this.state={
 			results: ""
 		};
+		this.getData = this.getData.bind(this);
 	}
 	async postData() {
 		try{
-			let result = await fetch('http://172.20.10.3:4000/actuator',{
+			let result = await fetch('http://localhost:4000/actuator',{
 				method: 'POST',
 				//mode: 'no-cors',
 				headers: {
@@ -37,7 +38,7 @@ class LineChart extends Component {
 	
 	async postData_1() {
 		try{
-			let result = await fetch('http://172.20.10.3:4000/actuator',{
+			let result = await fetch('http://localhost:4000/actuator',{
 				method: 'POST',
 				//mode: 'no-cors',
 				headers: {
@@ -54,11 +55,11 @@ class LineChart extends Component {
 		}
 	}
 
-	componentDidMount(){
+	getData(){
 		var chart = this.chart;
 		var chart1 = this.chart1;
 		var chart2 = this.chart2;
-		fetch('http://172.18.153.170:4000/espdata/')
+		fetch('http://localhost:4000/espdata/')
 		.then((response) => {
 			return response.json();
 		})
@@ -87,9 +88,16 @@ class LineChart extends Component {
 			chart.render();
 			chart1.render();
 			chart2.render();
-			//this.setState({results: ResData.LastTime});
+			this.setState({results: ResData.LastTime}, () => {
+				console.log(this.state.results);
+			});
 			console.log(this.results);
+			console.log(ResData);
 		});
+	}
+
+	componentDidMount(){
+		this.getData();
 	}
 
 	render() {	
@@ -151,7 +159,7 @@ class LineChart extends Component {
 			<h1 className="Titulo">Plataforma de Controlo de Humidade e Temperatura</h1>
 			Ativar Relé: <button onClick={() => this.postData()}>SEND ON</button>
 			Desativar Relé: <button onClick={() => this.postData_1()}>SEND OFF</button>
-			{this.results}
+		<h1>{this.state.results}</h1>
 			<div className="GraphsAr">
 				<div className="TAr">
 				<CanvasJSChart options = {options} 
