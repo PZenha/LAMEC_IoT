@@ -31,6 +31,7 @@ class LineChart extends Component {
 				})
 			});
 			console.log(result)
+			this.setState({results: new Date().toLocaleString()});
 		} catch(e){
 			console.log(e)
 		}
@@ -88,7 +89,7 @@ class LineChart extends Component {
 			chart.render();
 			chart1.render();
 			chart2.render();
-			this.setState({results: ResData.LastTime}, () => {
+			this.setState({results: new Date(ResData.LastTime).toLocaleString()}, () => {
 				console.log(this.state.results);
 			});
 			console.log(this.results);
@@ -96,9 +97,56 @@ class LineChart extends Component {
 		});
 	}
 
+	DataUpdate(){
+		var chart = this.chart;
+		var chart1 = this.chart1;
+		var chart2 = this.chart2;
+		fetch('http://localhost:4000/espdata/')
+		.then((response) => {
+			return response.json();
+		})
+		.then((ResData) => {
+			//var newDate = new Date(ResData.dados[0].Time).getTime();
+			var newDate = new Date(ResData.dados[0].Time).getTime();
+			var oldDate = new Date(dataPoints[0].x).getTime();
+			if(newDate > oldDate){
+				while(dataPoints.length > 0){
+					dataPoints.pop();
+					dataPoints_1.pop();
+					dataPoints_2.pop();
+				}
+				for (var i = 0; i < 10; i++) {
+					var today = new Date(ResData.dados[i].Time);
+					dataPoints.push({
+						x: today,
+						y: ResData.dados[i].T_air
+					});
+					dataPoints_1.push({
+						x: today,
+						y: ResData.dados[i].H_air
+					});
+					dataPoints_2.push({
+						x: today,
+						y: ResData.dados[i].soil
+					});
+				}
+			}
+			chart.render();
+			chart1.render();
+			chart2.render();
+			this.setState({results: new Date(ResData.LastTime).toLocaleString()}, () => {
+				console.log(this.state.results);
+			});
+		})
+
+	}
 	componentDidMount(){
 		this.getData();
+		setInterval(() => this.DataUpdate(),5000) 
 	}
+	/*componentWillUnmount(){
+		clearInterval(this.interval);
+	} */
 
 	render() {	
 		const options = {
@@ -113,7 +161,7 @@ class LineChart extends Component {
 				includeZero: false
 			},
 			data: [{
-				type: "spline",
+				type: "area",
 				xValueFormatString: "HH:mm:ss",
 				yValueFormatString: "##,##0.00 ºC",
 				dataPoints: dataPoints
@@ -130,7 +178,7 @@ class LineChart extends Component {
 				includeZero: false
 			},
 			data: [{
-				type: "spline",
+				type: "area",
 				xValueFormatString: "HH:mm:ss",
 				yValueFormatString: "##,#0 %",
 				dataPoints: dataPoints_1
@@ -147,7 +195,7 @@ class LineChart extends Component {
 				includeZero: false
 			},
 			data: [{
-				type: "spline",
+				type: "area",
 				xValueFormatString: "HH:mm:ss",
 				yValueFormatString: "##,#0 %",
 				dataPoints: dataPoints_2
@@ -157,9 +205,9 @@ class LineChart extends Component {
 		return (
 		<div className="Global">
 			<h1 className="Titulo">Plataforma de Controlo de Humidade e Temperatura</h1>
-			Ativar Relé: <button onClick={() => this.postData()}>SEND ON</button>
-			Desativar Relé: <button onClick={() => this.postData_1()}>SEND OFF</button>
-		<h1>{this.state.results}</h1>
+			Ativar motor: <button onClick={() => this.postData()}>ON</button><br></br>
+			Desativar motor: <button onClick={() => this.postData_1()}>OFF</button>
+		<h2>Motor foi ligado ás: {this.state.results}</h2>
 			<div className="GraphsAr">
 				<div className="TAr">
 				<CanvasJSChart options = {options} 
