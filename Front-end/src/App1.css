@@ -1,0 +1,30 @@
+.Global{
+    /* background-color: silver; */
+}
+
+.GraphsAr{
+    display: flex;
+}
+
+.TAr{
+    flex: 0 0 50%;
+    /* width: 35%; */
+}
+
+.HAr{
+    flex: 1;
+    /* width: 35vw; */
+}
+
+.GraphSolo{
+    width: 50%;
+    margin: 0 auto;
+}
+
+.Titulo{
+    font-size:2em;
+    text-align: center;
+    /* border-style: solid;
+    border-color: blue; */
+    color: black;
+}
