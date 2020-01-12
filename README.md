@@ -12,13 +12,19 @@ The sensors used was the DHT11 for air temperature and humidity and for the soil
 
 ### Technologies stack used
 
-*[Node.js](https://nodejs.org/en/) used to develop the server
-*[Mosca](https://github.com/mcollina/mosca) was used to implement the broker with Node.js
-*[React.js](https://reactjs.org/) used to develop the web application
-*[MongoDB](https://www.mongodb.com/) used to store the sensor values
-*[ESP8266](https://www.espressif.com/sites/default/files/documentation/0a-esp8266ex_datasheet_en.pdf) microcontroller
-*[DHT11](https://www.mouser.com/datasheet/2/758/DHT11-Technical-Data-Sheet-Translated-Version-1143054.pdf) Air temperature and humidity sensor
-*[SEN0193](https://media.digikey.com/pdf/Data%20Sheets/DFRobot%20PDFs/SEN0193_Web.pdf) Soil humidity sensor
+* [Node.js](https://nodejs.org/en/) used to develop the server
+
+* [Mosca](https://github.com/mcollina/mosca) was used to implement the broker with Node.js
+
+* [React.js](https://reactjs.org/) used to develop the web application
+
+* [MongoDB](https://www.mongodb.com/) used to store the sensor values
+
+* [ESP8266](https://www.espressif.com/sites/default/files/documentation/0a-esp8266ex_datasheet_en.pdf) microcontroller
+
+* [DHT11](https://www.mouser.com/datasheet/2/758/DHT11-Technical-Data-Sheet-Translated-Version-1143054.pdf) Air temperature and humidity sensor
+
+* [SEN0193](https://media.digikey.com/pdf/Data%20Sheets/DFRobot%20PDFs/SEN0193_Web.pdf) Soil humidity sensor
 
 ## Final result
 ![Web app](https://i.gyazo.com/23601fecde19b4b0839dbc9b4edd6137.png)
