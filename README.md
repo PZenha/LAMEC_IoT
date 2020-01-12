@@ -31,7 +31,7 @@ The sensors used was the DHT11 for air temperature and humidity and for the soil
 ![Final looks](https://i.gyazo.com/7fedd67f354218e1ae093910507d12e5.png)
 Dont mind those corn flakes behind :)
 
-### Installation
+## Installation
 Install [Node.js](https://nodejs.org/en/)
 ```
 git clone https://github.com/PZenha/LAMEC_IoT
