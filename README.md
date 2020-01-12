@@ -1,4 +1,4 @@
-# LAMEC_IoT
+# LAMEC IoT project
 
 This project was develop for the LAMEC subject for my masters degree at ISEP.
 
