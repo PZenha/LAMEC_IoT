@@ -8,6 +8,8 @@ The project consist of two microcontroller ESP8266 that measures air temperature
 
 The objective is to turn a water pump in case the soil humidity is to low or the user wants to turn it on directly on the web app.
 
+The sensors used was the DHT11 for air temperature and humidity and for the soil humidity the SEN0193.
+
 ## Final result
 ![Web app](https://i.gyazo.com/23601fecde19b4b0839dbc9b4edd6137.png)
 ![Final looks](https://i.gyazo.com/7fedd67f354218e1ae093910507d12e5.png)
@@ -18,7 +20,8 @@ Install [Node.js](https://nodejs.org/en/)
 ```
 git clone https://github.com/PZenha/LAMEC_IoT
 ```
-To run the back-end:
+**For the Back-end:** 
+
 The broker.js is the MQTT broker and the App.js is our server
 ```
 cd Back-end
@@ -27,7 +30,7 @@ node App.js
 ```
 The server will run on port 4000
 
-For the Front-end:
+**For the Front-end:**
 ```
 cd Front-end
 npm install
@@ -35,5 +38,5 @@ npm start
 ```
 The application will run on port 3000
 
-For the ESP8266 install the [Arduino IDE](https://www.arduino.cc/) or personally I prefer the [Atmel Studio](https://www.microchip.com/mplab/avr-support/atmel-studio-7) with the Vmicro add-in.
+**For the ESP8266** install the [Arduino IDE](https://www.arduino.cc/) or personally I prefer the [Atmel Studio](https://www.microchip.com/mplab/avr-support/atmel-studio-7) with the Vmicro add-in.
 Flash the code of the sensors into one ESP8266 and the actuator code on the other one.
