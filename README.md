@@ -27,7 +27,7 @@ The sensors used was the DHT11 for air temperature and humidity and for the soil
 * [SEN0193](https://media.digikey.com/pdf/Data%20Sheets/DFRobot%20PDFs/SEN0193_Web.pdf) Soil humidity sensor
 
 ## Final result
-![Web app](https://i.gyazo.com/23601fecde19b4b0839dbc9b4edd6137.png)
+![Web app](https://scontent.fopo1-1.fna.fbcdn.net/v/t1.15752-9/82600323_515964245714655_4033340905057419264_n.png?_nc_cat=107&_nc_ohc=yKTXSll0Rk0AX-OllLY&_nc_ht=scontent.fopo1-1.fna&oh=e606ea7c6fb768a99ed16d367a8baa07&oe=5E920AF9)
 ![Final looks](https://i.gyazo.com/7fedd67f354218e1ae093910507d12e5.png)
 Dont mind those corn flakes behind :)
 
